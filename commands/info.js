@@ -23,6 +23,10 @@ export async function execute(interaction) {
   const authLimit = Number(raw.authorize_p);
   const totalCount = X;
 
+  const timeInfo = raw.time_inf || '未提供';
+  const credit = raw.credit || '未提供';
+  const comment = raw.comment || raw.restrict || '無';
+
   const reply = `
 **📖 課程詳細資訊**
 
@@ -36,11 +40,10 @@ export async function execute(interaction) {
 授權碼：${authCount} / ${authLimit}
 選課總人數：${totalCount}
 
-**課程時間：** ${raw.time_chn || '未提供'}
-**教室：** ${raw.place || '未提供'}
-**學分：** ${raw.credits || '未提供'}
+**課程時間與教室：** ${timeInfo}
+**學分：** ${credit}
 
-**備註：** ${raw.note || '無'}
+**備註：** ${comment}
 `.trim();
 
   await interaction.editReply(reply);
