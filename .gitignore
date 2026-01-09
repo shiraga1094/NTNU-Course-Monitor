@@ -1,0 +1,28 @@
+# 依賴
+node_modules/
+package-lock.json
+
+# 環境變數
+.env
+.env.local
+.env.*.local
+
+# 資料和日誌
+data/
+log/
+*.log
+
+# IDE 設定
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 暫存檔
+*.tmp
+*.temp

@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  ntnu-course-bot:
+    build: .
+    container_name: ntnu-course-monitor
+    restart: unless-stopped
+    
+    # 環境變數（從 .env 載入）
+    env_file:
+      - .env
+    
+    # 掛載資料目錄（持久化）
+    volumes:
+      - ./data:/app/data
+      - ./log:/app/log
+    
+    # 日誌設定
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    # 健康檢查（可選）
+    # healthcheck:
+    #   test: ["CMD", "node", "-e", "console.log('healthy')"]
+    #   interval: 60s
+    #   timeout: 10s
+    #   retries: 3

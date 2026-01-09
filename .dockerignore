@@ -1,0 +1,28 @@
+# 忽略 node_modules
+node_modules
+npm-debug.log
+
+# 忽略資料和日誌
+data
+log
+
+# 忽略環境變數
+.env
+.env.local
+.env.*.local
+
+# 忽略 git
+.git
+.gitignore
+
+# 忽略 IDE 設定
+.vscode
+.idea
+
+# 忽略測試和文件
+*.md
+!README.md
+
+# 忽略暫存檔
+*.tmp
+*.log
