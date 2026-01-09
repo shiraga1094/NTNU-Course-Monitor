@@ -1,4 +1,5 @@
 import { loadSubs, saveSubs } from "../utils/storage.js";
+import { logInfo } from "../utils/logger.js";
 
 export async function execute(interaction) {
   await interaction.deferReply({ ephemeral: true });
@@ -11,17 +12,15 @@ export async function execute(interaction) {
   const uid = interaction.user.id;
   const subs = loadSubs();
 
-  // 檢查是否有 track（有 lastFull 屬性）
-  if (!subs[uid] || !subs[uid][key] || subs[uid][key].lastFull === undefined) {
-    await interaction.editReply(`你尚未訂閱 ${key} 的狀態監控`);
+  // 檢查是否有 schedule
+  if (!subs[uid] || !subs[uid][key] || !subs[uid][key].scheduledReport?.enabled) {
+    await interaction.editReply(`課程 ${key} 尚未設定定時報告`);
     return;
   }
 
-  // 刪除 track 相關屬性
-  delete subs[uid][key].lastFull;
-  delete subs[uid][key].notifyMode;
-  delete subs[uid][key].channelId;
-  
+  // 刪除定時報告
+  delete subs[uid][key].scheduledReport;
+
   // 如果沒有其他東西了，刪除整個課程
   const hasOtherData = Object.keys(subs[uid][key]).some(
     k => !['courseCode', 'year', 'term'].includes(k)
@@ -37,5 +36,6 @@ export async function execute(interaction) {
   }
 
   saveSubs(subs);
-  await interaction.editReply(`✅ 已取消 ${key} 的狀態監控`);
+  await interaction.editReply(`✅ 已取消 ${key} 的定時報告`);
+  logInfo(`用戶 ${uid} 取消課程 ${key} 定時報告`);
 }

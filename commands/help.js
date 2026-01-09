@@ -5,6 +5,7 @@ export async function execute(interaction) {
 **基本指令：**
 \`/ping\` - 測試 bot 是否正常運作
 \`/help\` - 顯示此說明訊息
+\`/botstats\` - 顯示 Bot 運行統計資訊
 
 **課程查詢：**
 \`/status <課程代碼> <學年> <學期>\`
@@ -15,8 +16,9 @@ export async function execute(interaction) {
 顯示課程詳細資訊
 
 **訂閱管理：**
-\`/track <課程代碼> <學年> <學期>\`
+\`/track <課程代碼> <學年> <學期> [頻道ID]\`
 訂閱課程人數變化，當課程從「滿人」變成「未滿」或反之時會收到通知
+頻道ID 選填，不填則私訊
 
 \`/untrack <課程代碼> <學年> <學期>\`
 取消訂閱課程
@@ -30,6 +32,15 @@ export async function execute(interaction) {
 - \`available\` - 僅在有名額時通知
 - \`full\` - 僅在滿人時通知
 
+**定時報告：**
+\`/schedule <課程代碼> <學年> <學期> [間隔] [頻道ID]\`
+設定定時自動回傳選課人數
+- 間隔：報告間隔（分鐘），預設 60 分鐘
+- 頻道ID：選填，不填則私訊
+
+\`/unschedule <課程代碼> <學年> <學期>\`
+取消定時報告
+
 **參數說明：**
 • 課程代碼：如 AEU0049
 • 學年：如 114
@@ -37,7 +48,8 @@ export async function execute(interaction) {
 
 **注意事項：**
 • Bot 每 60 秒檢查一次課程狀態
-• 通知會以私訊方式發送
+• 通知會以私訊方式發送（除非設定頻道）
+• 定時報告可設定發送到特定頻道
 • 所有訂閱資料僅供個人使用
 `.trim();
 

@@ -7,6 +7,8 @@ Discord Bot 用於監控台師大選課系統的課程人數變化，並即時�
 - **即時查詢** - 查詢課程當前選課狀況
 - **詳細資訊** - 顯示課程完整資訊（時間、教室、學分等）
 - **智能通知** - 課程人數變化時自動通知
+- **定時報告** - 設定定期自動回傳選課人數
+- **Bot 狀態** - 查看 Bot 運行統計和系統狀態
 - **彈性設定** - 可自訂通知偏好（雙向/僅未滿/僅滿人）
 - **穩定可靠** - 內建重試機制和錯誤處理
 - **容器化部署** - 支援 Docker 一鍵部署
@@ -18,6 +20,7 @@ Discord Bot 用於監控台師大選課系統的課程人數變化，並即時�
 .
 ├── index.js                    # 主程式入口
 ├── monitor.js                  # 監控邏輯模組
+├── scheduler.js                # 定時報告系統
 ├── config.js                   # 配置管理
 ├── register-command.js         # Discord 指令註冊
 ├── fetchOneCourse.js          # 課程資料抓取
@@ -34,13 +37,17 @@ Discord Bot 用於監控台師大選課系統的課程人數變化，並即時�
 │   ├── track.js             
 │   ├── untrack.js           
 │   ├── list.js              
-│   └── notify.js            
+│   ├── notify.js            
+│   ├── botstats.js           # Bot 狀態統計
+│   ├── schedule.js           # 設定定時報告
+│   └── unschedule.js         # 取消定時報告
 ├── utils/                     # 工具模組
 │   ├── logger.js             # 日誌系統（彩色輸出、級別控制）
 │   ├── storage.js            # 資料儲存
 │   ├── validateEnv.js        # 環境變數驗證
 │   ├── retry.js              # 重試機制
-│   └── cleanup.js            # 資料清理
+│   ├── cleanup.js            # 資料清理
+│   └── stats.js              # 統計追蹤
 ├── data/                      # 資料目錄
 │   ├── subscriptions.json    
 │   └── tmp.json              

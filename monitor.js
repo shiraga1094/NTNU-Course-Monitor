@@ -1,6 +1,7 @@
 import { fetchOneCourse } from "./fetchOneCourse.js";
 import { loadSubs, saveSubs, updateTmp } from "./utils/storage.js";
 import { logInfo, logError, logDebug } from "./utils/logger.js";
+import { botStats } from "./utils/stats.js";
 import { config } from "./config.js";
 
 /**
@@ -10,10 +11,21 @@ export async function monitorLoop(client) {
   const subs = loadSubs();
   const courseMap = {};
 
-  // 收集所有需要監控的課程
+  // 收集所有有 track（有 lastFull）的課程
   for (const uid of Object.keys(subs)) {
-    for (const key of Object.keys(subs[uid])) {
-      courseMap[key] = subs[uid][key];
+    for (const [key, entry] of Object.entries(subs[uid])) {
+      // 只處理有 track 的課程（有 lastFull 屬性）
+      if (entry.lastFull === undefined) continue;
+      
+      if (!courseMap[key]) {
+        courseMap[key] = {
+          courseCode: entry.courseCode,
+          year: entry.year,
+          term: entry.term,
+          users: []
+        };
+      }
+      courseMap[key].users.push(uid);
     }
   }
 
@@ -46,9 +58,9 @@ export async function monitorLoop(client) {
       const isFullNow = normalCount >= normalLimit;
 
       // 通知所有訂閱此課程的用戶
-      for (const uid of Object.keys(subs)) {
+      for (const uid of c.users) {
         const entry = subs[uid][key];
-        if (!entry) continue;
+        if (!entry || entry.lastFull === undefined) continue;
 
         const notifyMode = entry.notifyMode || "both";
         const shouldNotify = shouldSendNotification(
@@ -59,21 +71,39 @@ export async function monitorLoop(client) {
 
         if (shouldNotify) {
           try {
-            const user = await client.users.fetch(uid);
             const statusChange = entry.lastFull ? "滿人 → 未滿 🟢" : "未滿 → 滿人 🔴";
-            
-            await user.send(
+            const notificationMessage = 
               `**課程狀態變更通知**\n\n` +
               `課程：${course.name}\n` +
               `狀態變更：${statusChange}\n` +
               `選課人數：${normalCount} / ${normalLimit}\n` +
-              `課程代碼：${key}`
-            );
+              `課程代碼：${key}`;
+
+            // 發送通知（頻道或私訊）
+            if (entry.channelId) {
+              try {
+                const channel = await client.channels.fetch(entry.channelId);
+                await channel.send(`<@${uid}> ${notificationMessage}`);
+                logInfo(`通知已發送到頻道 ${entry.channelId} - 課程 ${key} - 用戶 ${uid}`);
+              } catch (channelError) {
+                logError(`發送頻道通知失敗 channel=${entry.channelId}: ${channelError.message}`);
+                // 失敗時改發私訊
+                const user = await client.users.fetch(uid);
+                await user.send(notificationMessage + `\n\n⚠️ 無法發送到指定頻道，改以私訊發送`);
+                logInfo(`已改以私訊通知用戶 ${uid} - 課程 ${key}`);
+              }
+            } else {
+              // 私訊
+              const user = await client.users.fetch(uid);
+              await user.send(notificationMessage);
+              logInfo(`通知用戶 ${uid} 課程 ${key} 狀態變更：${statusChange}`);
+            }
 
             entry.lastFull = isFullNow;
-            logInfo(`通知用戶 ${uid} 課程 ${key} 狀態變更：${statusChange}`);
+            botStats.incrementNotifications();
           } catch (error) {
             logError(`發送通知失敗 user=${uid} course=${key}: ${error.message}`);
+            botStats.incrementErrors();
           }
         }
       }
@@ -87,6 +117,7 @@ export async function monitorLoop(client) {
   }
 
   saveSubs(subs);
+  botStats.incrementMonitorLoops();
   logInfo("監控循環完成");
 }
 

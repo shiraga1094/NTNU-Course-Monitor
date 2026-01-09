@@ -7,6 +7,7 @@ export async function execute(interaction) {
   const courseCode = interaction.options.getString("course_code");
   const year = interaction.options.getInteger("year");
   const term = interaction.options.getInteger("term");
+  const channelId = interaction.options.getString("channel_id");
 
   const course = await fetchOneCourse({ courseCode, year, term });
   if (!course || !course.raw) {
@@ -29,12 +30,20 @@ export async function execute(interaction) {
     courseCode,
     year,
     term,
-    lastFull: isFull
+    lastFull: isFull,
+    channelId: channelId || null
   };
 
   saveSubs(subs);
 
+  const notifyTarget = channelId 
+    ? `頻道 <#${channelId}>` 
+    : "私訊";
+
   await interaction.editReply(
-    `tracked ${key}\n初始狀態：${isFull ? "滿人" : "未滿"}`
+    `✅ 已訂閱課程 ${key}\n\n` +
+    `初始狀態：${isFull ? "🔴 滿人" : "🟢 未滿"}\n` +
+    `通知方式：${notifyTarget}\n\n` +
+    `當課程人數變化時將收到通知`
   );
 }

@@ -3,6 +3,8 @@ import { validateEnv } from "./utils/validateEnv.js";
 import { logInfo, logError, logCommand, logSuccess } from "./utils/logger.js";
 import { startMonitorSchedule } from "./monitor.js";
 import { startCleanupSchedule } from "./utils/cleanup.js";
+import { startScheduledReports } from "./scheduler.js";
+import { botStats } from "./utils/stats.js";
 import { config } from "./config.js";
 
 // 驗證環境變數
@@ -22,6 +24,9 @@ import * as trackCmd from "./commands/track.js";
 import * as untrackCmd from "./commands/untrack.js";
 import * as listCmd from "./commands/list.js";
 import * as notifyCmd from "./commands/notify.js";
+import * as botstatsCmd from "./commands/botstats.js";
+import * as scheduleCmd from "./commands/schedule.js";
+import * as unscheduleCmd from "./commands/unschedule.js";
 
 const commandHandlers = {
   ping: pingCmd,
@@ -31,7 +36,10 @@ const commandHandlers = {
   track: trackCmd,
   untrack: untrackCmd,
   list: listCmd,
-  notify: notifyCmd
+  notify: notifyCmd,
+  botstats: botstatsCmd,
+  schedule: scheduleCmd,
+  unschedule: unscheduleCmd
 };
 
 /* ================= discord client ================= */
@@ -48,6 +56,9 @@ client.once("ready", () => {
   
   // 啟動清理排程
   startCleanupSchedule();
+  
+  // 啟動定時報告系統
+  startScheduledReports(client);
 });
 
 /* ================= interactions ================= */
@@ -61,8 +72,10 @@ client.on("interactionCreate", async interaction => {
   if (handler && handler.execute) {
     try {
       await handler.execute(interaction);
+      botStats.incrementCommands();
     } catch (error) {
       logError(`指令錯誤 cmd=${interaction.commandName} error=${error.message}`);
+      botStats.incrementErrors();
       const reply = { content: "執行指令時發生錯誤", ephemeral: true };
       if (interaction.replied || interaction.deferred) {
         await interaction.editReply(reply);
