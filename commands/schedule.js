@@ -14,7 +14,6 @@ export async function execute(interaction) {
   const key = `${courseCode}-${year}-${term}`;
   const uid = interaction.user.id;
 
-  // 驗證課程是否存在並獲取資料
   const course = await fetchOneCourse({ courseCode, year, term });
   if (!course || !course.raw) {
     await interaction.editReply("找不到該課程");
@@ -23,10 +22,8 @@ export async function execute(interaction) {
 
   const subs = loadSubs();
 
-  // 初始化用戶訂閱
   if (!subs[uid]) subs[uid] = {};
   
-  // 如果課程不存在，創建空的訂閱項目
   if (!subs[uid][key]) {
     subs[uid][key] = {
       courseCode,
@@ -35,7 +32,6 @@ export async function execute(interaction) {
     };
   }
 
-  // 設定定時報告（獨立於 track）
   subs[uid][key].scheduledReport = {
     enabled: true,
     intervalMinutes: interval,
@@ -45,7 +41,6 @@ export async function execute(interaction) {
 
   saveSubs(subs);
 
-  // 立即發送第一次報告
   const raw = course.raw;
   const Y = Number(raw.authorize_using);
   const normalCount = -Y;
@@ -77,7 +72,6 @@ _可使用 \`/unschedule\` 取消定時報告_
 
   const reportTarget = channelId ? `頻道 <#${channelId}>` : "私訊";
 
-  // 發送初始報告
   try {
     if (channelId) {
       const channel = await interaction.client.channels.fetch(channelId);

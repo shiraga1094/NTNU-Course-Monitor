@@ -22,7 +22,7 @@ async function createClient() {
     }
   }));
 
-  await client.get(INDEX); // 拿 session
+  await client.get(INDEX);
   await sleep(500);
   return client;
 }

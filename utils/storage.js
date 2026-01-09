@@ -5,7 +5,6 @@ const DATA_DIR = config.paths.dataDir;
 const SUB_FILE = config.paths.subscriptions;
 const TMP_FILE = config.paths.tmp;
 
-// 確保 data 目錄存在
 if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
 }
@@ -23,8 +22,6 @@ function nowString() {
   );
 }
 
-/* ================= subscriptions ================= */
-
 export function loadSubs() {
   if (!fs.existsSync(SUB_FILE)) return {};
   return JSON.parse(fs.readFileSync(SUB_FILE, "utf8"));
@@ -33,8 +30,6 @@ export function loadSubs() {
 export function saveSubs(data) {
   fs.writeFileSync(SUB_FILE, JSON.stringify(data, null, 2));
 }
-
-/* ================= tmp cache ================= */
 
 export function loadTmp() {
   if (!fs.existsSync(TMP_FILE)) return {};

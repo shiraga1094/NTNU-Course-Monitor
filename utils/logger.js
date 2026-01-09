@@ -4,12 +4,10 @@ import { config } from "../config.js";
 const LOG_DIR = config.paths.logDir;
 const LOG_FILE = config.paths.log;
 
-// 確保 log 目錄存在
 if (!fs.existsSync(LOG_DIR)) {
   fs.mkdirSync(LOG_DIR, { recursive: true });
 }
 
-// ANSI 顏色代碼
 const colors = {
   reset: "\x1b[0m",
   bright: "\x1b[1m",
@@ -24,7 +22,6 @@ const colors = {
   gray: "\x1b[90m"
 };
 
-// 日誌級別配置
 const levels = {
   DEBUG: { name: "DEBUG", color: colors.gray, priority: 0 },
   INFO: { name: "INFO ", color: colors.blue, priority: 1 },
@@ -52,17 +49,14 @@ function nowString() {
 function log(level, message) {
   const levelConfig = levels[level] || levels.INFO;
   
-  // 過濾低於設定級別的日誌
   if (levelConfig.priority < minPriority) return;
 
   const timestamp = nowString();
   const logMessage = `[${timestamp}] [${levelConfig.name}] ${message}`;
   
-  // 控制台輸出（帶顏色）
   const coloredMessage = `${colors.gray}[${timestamp}]${colors.reset} ${levelConfig.color}[${levelConfig.name}]${colors.reset} ${message}`;
   console.log(coloredMessage);
   
-  // 檔案輸出（不帶顏色）
   fs.appendFileSync(LOG_FILE, logMessage + "\n");
 }
 

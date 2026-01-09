@@ -4,17 +4,12 @@ import { logInfo, logError, logDebug } from "./utils/logger.js";
 import { botStats } from "./utils/stats.js";
 import { config } from "./config.js";
 
-/**
- * 監控循環 - 檢查所有訂閱的課程
- */
 export async function monitorLoop(client) {
   const subs = loadSubs();
   const courseMap = {};
 
-  // 收集所有有 track（有 lastFull）的課程
   for (const uid of Object.keys(subs)) {
     for (const [key, entry] of Object.entries(subs[uid])) {
-      // 只處理有 track 的課程（有 lastFull 屬性）
       if (entry.lastFull === undefined) continue;
       
       if (!courseMap[key]) {
@@ -36,7 +31,6 @@ export async function monitorLoop(client) {
 
   logInfo(`開始監控 ${Object.keys(courseMap).length} 個課程...`);
 
-  // 檢查每個課程
   for (const [key, c] of Object.entries(courseMap)) {
     try {
       const course = await fetchOneCourse({
@@ -57,7 +51,6 @@ export async function monitorLoop(client) {
       const normalLimit = Number(course.raw.limit_count_h);
       const isFullNow = normalCount >= normalLimit;
 
-      // 通知所有訂閱此課程的用戶
       for (const uid of c.users) {
         const entry = subs[uid][key];
         if (!entry || entry.lastFull === undefined) continue;
@@ -79,7 +72,6 @@ export async function monitorLoop(client) {
               `選課人數：${normalCount} / ${normalLimit}\n` +
               `課程代碼：${key}`;
 
-            // 發送通知（頻道或私訊）
             if (entry.channelId) {
               try {
                 const channel = await client.channels.fetch(entry.channelId);
@@ -93,7 +85,6 @@ export async function monitorLoop(client) {
                 logInfo(`已改以私訊通知用戶 ${uid} - 課程 ${key}`);
               }
             } else {
-              // 私訊
               const user = await client.users.fetch(uid);
               await user.send(notificationMessage);
               logInfo(`通知用戶 ${uid} 課程 ${key} 狀態變更：${statusChange}`);
@@ -108,7 +99,6 @@ export async function monitorLoop(client) {
         }
       }
 
-      // 延遲避免請求過於頻繁
       await new Promise(r => setTimeout(r, config.monitor.perFetchDelay));
       
     } catch (err) {
@@ -121,33 +111,19 @@ export async function monitorLoop(client) {
   logInfo("監控循環完成");
 }
 
-/**
- * 判斷是否應該發送通知
- */
 function shouldSendNotification(lastFull, isFullNow, notifyMode) {
-  if (lastFull === isFullNow) {
-    return false; // 狀態沒變化
-  }
+  if (lastFull === isFullNow) return false;
 
   switch (notifyMode) {
     case "available":
-      // 僅在變成有名額時通知（滿 → 未滿）
       return lastFull === true && isFullNow === false;
-    
     case "full":
-      // 僅在變成滿人時通知（未滿 → 滿）
       return lastFull === false && isFullNow === true;
-    
     case "both":
     default:
-      // 任何變化都通知
       return true;
   }
 }
-
-/**
- * 啟動監控排程
- */
 export function startMonitorSchedule(client) {
   const interval = config.monitor.checkInterval;
   

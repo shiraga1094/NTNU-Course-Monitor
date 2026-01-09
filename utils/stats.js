@@ -1,4 +1,3 @@
-// 用於追蹤 bot 統計資訊
 export const botStats = {
   startTime: Date.now(),
   notificationsSent: 0,

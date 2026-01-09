@@ -1,13 +1,12 @@
 import { Client, GatewayIntentBits } from "discord.js";
 import { validateEnv } from "./utils/validateEnv.js";
-import { logInfo, logError, logCommand, logSuccess } from "./utils/logger.js";
+import { logCommand, logError, logSuccess } from "./utils/logger.js";
 import { startMonitorSchedule } from "./monitor.js";
 import { startCleanupSchedule } from "./utils/cleanup.js";
 import { startScheduledReports } from "./scheduler.js";
 import { botStats } from "./utils/stats.js";
 import { config } from "./config.js";
 
-// 驗證環境變數
 try {
   validateEnv();
 } catch (error) {
@@ -15,7 +14,6 @@ try {
   process.exit(1);
 }
 
-// 動態載入指令處理器
 import * as pingCmd from "./commands/ping.js";
 import * as helpCmd from "./commands/help.js";
 import * as statusCmd from "./commands/status.js";
@@ -42,26 +40,16 @@ const commandHandlers = {
   unschedule: unscheduleCmd
 };
 
-/* ================= discord client ================= */
-
 const client = new Client({
   intents: [GatewayIntentBits.Guilds]
 });
 
 client.once("ready", () => {
   logSuccess(`Bot 已啟動 ${client.user.tag}`);
-  
-  // 啟動監控排程
   startMonitorSchedule(client);
-  
-  // 啟動清理排程
   startCleanupSchedule();
-  
-  // 啟動定時報告系統
   startScheduledReports(client);
 });
-
-/* ================= interactions ================= */
 
 client.on("interactionCreate", async interaction => {
   if (!interaction.isChatInputCommand()) return;
@@ -85,8 +73,6 @@ client.on("interactionCreate", async interaction => {
     }
   }
 });
-
-/* ================= 啟動 bot ================= */
 
 client.login(config.discord.token).catch(error => {
   logError(`Bot 登入失敗: ${error.message}`);
