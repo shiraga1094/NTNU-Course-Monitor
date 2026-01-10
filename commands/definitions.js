@@ -14,8 +14,8 @@ export const commands = [
     .setDescription("查詢課程即時選課狀況")
     .addStringOption(opt =>
       opt
-        .setName("course_code")
-        .setDescription("課程代碼，例如 AEU0049")
+        .setName("serial_no")
+        .setDescription("開課序號，例如 1001")
         .setRequired(true)
     )
     .addIntegerOption(opt =>
@@ -36,8 +36,8 @@ export const commands = [
     .setDescription("顯示課程詳細資訊")
     .addStringOption(opt =>
       opt
-        .setName("course_code")
-        .setDescription("課程代碼，例如 AEU0049")
+        .setName("serial_no")
+        .setDescription("開課序號，例如 1001")
         .setRequired(true)
     )
     .addIntegerOption(opt =>
@@ -58,8 +58,8 @@ export const commands = [
     .setDescription("訂閱課程人數變化")
     .addStringOption(opt =>
       opt
-        .setName("course_code")
-        .setDescription("課程代碼，例如 AEU0049")
+        .setName("serial_no")
+        .setDescription("開課序號，例如 1001")
         .setRequired(true)
     )
     .addIntegerOption(opt =>
@@ -86,8 +86,8 @@ export const commands = [
     .setDescription("取消訂閱課程")
     .addStringOption(opt =>
       opt
-        .setName("course_code")
-        .setDescription("課程代碼，例如 AEU0049")
+        .setName("serial_no")
+        .setDescription("開課序號，例如 1001")
         .setRequired(true)
     )
     .addIntegerOption(opt =>
@@ -112,8 +112,8 @@ export const commands = [
     .setDescription("設定課程通知偏好")
     .addStringOption(opt =>
       opt
-        .setName("course_code")
-        .setDescription("課程代碼，例如 AEU0049")
+        .setName("serial_no")
+        .setDescription("開課序號，例如 1001")
         .setRequired(true)
     )
     .addIntegerOption(opt =>
@@ -149,8 +149,8 @@ export const commands = [
     .setDescription("設定課程定時報告（自動回傳選課人數）")
     .addStringOption(opt =>
       opt
-        .setName("course_code")
-        .setDescription("課程代碼，例如 AEU0049")
+        .setName("serial_no")
+        .setDescription("開課序號，例如 1001")
         .setRequired(true)
     )
     .addIntegerOption(opt =>
@@ -185,8 +185,8 @@ export const commands = [
     .setDescription("取消課程定時報告")
     .addStringOption(opt =>
       opt
-        .setName("course_code")
-        .setDescription("課程代碼，例如 AEU0049")
+        .setName("serial_no")
+        .setDescription("開課序號，例如 1001")
         .setRequired(true)
     )
     .addIntegerOption(opt =>

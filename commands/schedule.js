@@ -5,16 +5,16 @@ import { logInfo } from "../utils/logger.js";
 export async function execute(interaction) {
   await interaction.deferReply({ ephemeral: true });
 
-  const courseCode = interaction.options.getString("course_code");
+  const serialNo = interaction.options.getString("serial_no");
   const year = interaction.options.getInteger("year");
   const term = interaction.options.getInteger("term");
   const interval = interaction.options.getInteger("interval") || 60;
   const channelId = interaction.options.getString("channel_id");
 
-  const key = `${courseCode}-${year}-${term}`;
+  const key = `${serialNo}-${year}-${term}`;
   const uid = interaction.user.id;
 
-  const course = await fetchOneCourse({ courseCode, year, term });
+  const course = await fetchOneCourse({ serialNo, year, term });
   if (!course || !course.raw) {
     await interaction.editReply("找不到該課程");
     return;
@@ -26,7 +26,7 @@ export async function execute(interaction) {
   
   if (!subs[uid][key]) {
     subs[uid][key] = {
-      courseCode,
+      serialNo,
       year,
       term
     };
@@ -57,7 +57,7 @@ export async function execute(interaction) {
 
 **課程：** ${course.name}
 **教師：** ${course.teacher}
-**課程代碼：** ${key}
+**開課序號：** ${key}
 
 **選課狀況：**
 • 一般選課：${normalCount} / ${normalLimit} ${status}
@@ -84,7 +84,7 @@ _可使用 \`/unschedule\` 取消定時報告_
     await interaction.editReply(
       `✅ 已設定定時報告並發送首次報告\n\n` +
       `課程：${course.name}\n` +
-      `課程代碼：${key}\n` +
+      `開課序號：${key}\n` +
       `報告間隔：每 ${interval} 分鐘\n` +
       `報告位置：${reportTarget}`
     );
@@ -92,7 +92,7 @@ _可使用 \`/unschedule\` 取消定時報告_
     await interaction.editReply(
       `✅ 已設定定時報告\n\n` +
       `課程：${course.name}\n` +
-      `課程代碼：${key}\n` +
+      `開課序號：${key}\n` +
       `報告間隔：每 ${interval} 分鐘\n` +
       `報告位置：${reportTarget}\n\n` +
       `⚠️ 發送首次報告時出錯：${error.message}`

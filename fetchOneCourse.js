@@ -27,7 +27,7 @@ async function createClient() {
   return client;
 }
 
-export async function fetchOneCourse({ year, term, courseCode }) {
+export async function fetchOneCourse({ year, term, serialNo }) {
   return retry(async () => {
     const client = await createClient();
 
@@ -36,7 +36,7 @@ export async function fetchOneCourse({ year, term, courseCode }) {
         _dc: Date.now(),
         acadmYear: year,
         acadmTerm: term,
-        course_code: courseCode,
+        course_code: "",
         action: "showGrid",
         language: "chinese",
         start: 0,
@@ -55,7 +55,7 @@ export async function fetchOneCourse({ year, term, courseCode }) {
         kind: "",
         generalCore: "",
         teacher: "",
-        serial_number: ""
+        serial_number: serialNo
       }
     });
 

@@ -4,18 +4,18 @@ import { loadSubs, saveSubs, updateTmp } from "../utils/storage.js";
 export async function execute(interaction) {
   await interaction.deferReply({ ephemeral: true });
 
-  const courseCode = interaction.options.getString("course_code");
+  const serialNo = interaction.options.getString("serial_no");
   const year = interaction.options.getInteger("year");
   const term = interaction.options.getInteger("term");
   const channelId = interaction.options.getString("channel_id");
 
-  const course = await fetchOneCourse({ courseCode, year, term });
+  const course = await fetchOneCourse({ serialNo, year, term });
   if (!course || !course.raw) {
     await interaction.editReply("not found");
     return;
   }
 
-  const key = `${courseCode}-${year}-${term}`;
+  const key = `${serialNo}-${year}-${term}`;
   updateTmp(key, course.raw);
 
   const Y = Number(course.raw.authorize_using);
@@ -27,7 +27,7 @@ export async function execute(interaction) {
   const subs = loadSubs();
   if (!subs[uid]) subs[uid] = {};
   subs[uid][key] = {
-    courseCode,
+    serialNo,
     year,
     term,
     lastFull: isFull,

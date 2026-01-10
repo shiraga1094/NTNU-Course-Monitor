@@ -4,11 +4,11 @@ import { logInfo } from "../utils/logger.js";
 export async function execute(interaction) {
   await interaction.deferReply({ ephemeral: true });
 
-  const courseCode = interaction.options.getString("course_code");
+  const serialNo = interaction.options.getString("serial_no");
   const year = interaction.options.getInteger("year");
   const term = interaction.options.getInteger("term");
 
-  const key = `${courseCode}-${year}-${term}`;
+  const key = `${serialNo}-${year}-${term}`;
   const uid = interaction.user.id;
   const subs = loadSubs();
 
@@ -23,7 +23,7 @@ export async function execute(interaction) {
 
   // 如果沒有其他東西了，刪除整個課程
   const hasOtherData = Object.keys(subs[uid][key]).some(
-    k => !['courseCode', 'year', 'term'].includes(k)
+    k => !['serialNo', 'year', 'term'].includes(k)
   );
   
   if (!hasOtherData) {

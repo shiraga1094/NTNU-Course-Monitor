@@ -9,7 +9,7 @@ const NOTIFY_MODES = {
 export async function execute(interaction) {
   await interaction.deferReply({ ephemeral: true });
 
-  const courseCode = interaction.options.getString("course_code");
+  const serialNo = interaction.options.getString("serial_no");
   const year = interaction.options.getInteger("year");
   const term = interaction.options.getInteger("term");
   const mode = interaction.options.getString("mode") || "both";
@@ -23,7 +23,7 @@ export async function execute(interaction) {
     return;
   }
 
-  const key = `${courseCode}-${year}-${term}`;
+  const key = `${serialNo}-${year}-${term}`;
   const uid = interaction.user.id;
   const subs = loadSubs();
 

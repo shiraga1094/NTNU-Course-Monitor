@@ -4,17 +4,17 @@ import { updateTmp } from "../utils/storage.js";
 export async function execute(interaction) {
   await interaction.deferReply();
 
-  const courseCode = interaction.options.getString("course_code");
+  const serialNo = interaction.options.getString("serial_no");
   const year = interaction.options.getInteger("year");
   const term = interaction.options.getInteger("term");
 
-  const course = await fetchOneCourse({ courseCode, year, term });
+  const course = await fetchOneCourse({ serialNo, year, term });
   if (!course || !course.raw) {
     await interaction.editReply("not found");
     return;
   }
 
-  const key = `${courseCode}-${year}-${term}`;
+  const key = `${serialNo}-${year}-${term}`;
   updateTmp(key, course.raw);
 
   // raw JSON printf（只印 terminal）

@@ -3,11 +3,11 @@ import { fetchOneCourse } from "../fetchOneCourse.js";
 export async function execute(interaction) {
   await interaction.deferReply({ ephemeral: true });
 
-  const courseCode = interaction.options.getString("course_code");
+  const serialNo = interaction.options.getString("serial_no");
   const year = interaction.options.getInteger("year");
   const term = interaction.options.getInteger("term");
 
-  const course = await fetchOneCourse({ courseCode, year, term });
+  const course = await fetchOneCourse({ serialNo, year, term });
   if (!course || !course.raw) {
     await interaction.editReply("找不到該課程資訊");
     return;
@@ -31,7 +31,7 @@ export async function execute(interaction) {
 **📖 課程詳細資訊**
 
 **課程名稱：** ${course.name}
-**課程代碼：** ${raw.course_code || courseCode}
+**開課序號：** ${raw.serial_number || serialNo}
 **教師：** ${course.teacher}
 **學年/學期：** ${year} 學年 第 ${term} 學期
 

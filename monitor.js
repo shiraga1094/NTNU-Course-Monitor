@@ -14,7 +14,7 @@ export async function monitorLoop(client) {
       
       if (!courseMap[key]) {
         courseMap[key] = {
-          courseCode: entry.courseCode,
+          serialNo: entry.serialNo,
           year: entry.year,
           term: entry.term,
           users: []
@@ -34,7 +34,7 @@ export async function monitorLoop(client) {
   for (const [key, c] of Object.entries(courseMap)) {
     try {
       const course = await fetchOneCourse({
-        courseCode: c.courseCode,
+        serialNo: c.serialNo,
         year: c.year,
         term: c.term
       });
@@ -70,7 +70,7 @@ export async function monitorLoop(client) {
               `課程：${course.name}\n` +
               `狀態變更：${statusChange}\n` +
               `選課人數：${normalCount} / ${normalLimit}\n` +
-              `課程代碼：${key}`;
+              `開課序號：${key}`;
 
             if (entry.channelId) {
               try {

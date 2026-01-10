@@ -21,7 +21,7 @@ export async function scheduledReportLoop(client) {
 
       try {
         const course = await fetchOneCourse({
-          courseCode: entry.courseCode,
+          serialNo: entry.serialNo,
           year: entry.year,
           term: entry.term
         });
@@ -47,7 +47,7 @@ export async function scheduledReportLoop(client) {
 
 **課程：** ${course.name}
 **教師：** ${course.teacher}
-**課程代碼：** ${key}
+**開課序號：** ${key}
 
 **選課狀況：**
 • 一般選課：${normalCount} / ${normalLimit} ${status}
