@@ -36,6 +36,12 @@ export const config = {
     cleanupInterval: parseInt(process.env.CLEANUP_INTERVAL_HOURS) || 24 // 預設每 24 小時清理一次
   },
 
+  // 日誌配置
+  logging: {
+    timezone: process.env.TZ || "Asia/Taipei", // 預設 UTC+8
+    logRetentionDays: parseInt(process.env.LOG_RETENTION_DAYS) || 30 // 預設保留 30 天
+  },
+
   // NTNU 課程系統配置
   ntnu: {
     baseUrl: "https://courseap2.itc.ntnu.edu.tw",

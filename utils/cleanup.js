@@ -1,4 +1,5 @@
 import fs from "fs";
+import path from "path";
 import { config } from "../config.js";
 import { logInfo, logDebug } from "./logger.js";
 
@@ -69,12 +70,56 @@ export function cleanupEmptySubscriptions() {
 }
 
 /**
+ * 清理過期的 log 文件
+ */
+export function cleanupOldLogs() {
+  const logDir = config.paths.logDir;
+  
+  if (!fs.existsSync(logDir)) {
+    logDebug("Log 目錄不存在，跳過清理");
+    return;
+  }
+
+  const retentionDays = config.logging.logRetentionDays;
+  const now = Date.now();
+  const maxAge = retentionDays * 24 * 60 * 60 * 1000;
+  
+  let removed = 0;
+  
+  try {
+    const files = fs.readdirSync(logDir);
+    
+    for (const file of files) {
+      if (!file.startsWith("bot-") || !file.endsWith(".log")) continue;
+      
+      const filePath = path.join(logDir, file);
+      const stats = fs.statSync(filePath);
+      const age = now - stats.mtimeMs;
+      
+      if (age > maxAge) {
+        fs.unlinkSync(filePath);
+        removed++;
+      }
+    }
+    
+    if (removed > 0) {
+      logInfo(`清理完成：移除 ${removed} 個過期的 log 文件`);
+    } else {
+      logDebug("沒有需要清理的 log 文件");
+    }
+  } catch (error) {
+    logDebug(`清理 log 文件時發生錯誤：${error.message}`);
+  }
+}
+
+/**
  * 執行所有清理任務
  */
 export function runCleanup() {
   logInfo("開始執行資料清理...");
   cleanupOldTmpData();
   cleanupEmptySubscriptions();
+  cleanupOldLogs();
   logInfo("資料清理完成");
 }
 

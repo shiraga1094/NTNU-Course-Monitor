@@ -1,8 +1,8 @@
 import fs from "fs";
+import path from "path";
 import { config } from "../config.js";
 
 const LOG_DIR = config.paths.logDir;
-const LOG_FILE = config.paths.log;
 
 if (!fs.existsSync(LOG_DIR)) {
   fs.mkdirSync(LOG_DIR, { recursive: true });
@@ -34,22 +34,75 @@ const currentLogLevel = process.env.LOG_LEVEL?.toUpperCase() || "INFO";
 const minPriority = levels[currentLogLevel]?.priority ?? 1;
 
 function nowString() {
+  const timezone = config.logging.timezone;
   const d = new Date();
+  const localDate = new Date(d.toLocaleString("en-US", { timeZone: timezone }));
   const pad = n => String(n).padStart(2, "0");
   return (
-    `${d.getFullYear()}-` +
-    `${pad(d.getMonth() + 1)}-` +
-    `${pad(d.getDate())} ` +
-    `${pad(d.getHours())}:` +
-    `${pad(d.getMinutes())}:` +
-    `${pad(d.getSeconds())}`
+    `${localDate.getFullYear()}-` +
+    `${pad(localDate.getMonth() + 1)}-` +
+    `${pad(localDate.getDate())} ` +
+    `${pad(localDate.getHours())}:` +
+    `${pad(localDate.getMinutes())}:` +
+    `${pad(localDate.getSeconds())}`
   );
 }
+
+function getDateString() {
+  const timezone = config.logging.timezone;
+  const d = new Date();
+  const localDate = new Date(d.toLocaleString("en-US", { timeZone: timezone }));
+  const pad = n => String(n).padStart(2, "0");
+  return `${localDate.getFullYear()}-${pad(localDate.getMonth() + 1)}-${pad(localDate.getDate())}`;
+}
+
+function getLogFile() {
+  const dateStr = getDateString();
+  return path.join(LOG_DIR, `bot-${dateStr}.log`);
+}
+
+function cleanupOldLogs() {
+  try {
+    const retentionDays = config.logging.logRetentionDays;
+    const now = Date.now();
+    const maxAge = retentionDays * 24 * 60 * 60 * 1000;
+    
+    const files = fs.readdirSync(LOG_DIR);
+    let removedCount = 0;
+    
+    for (const file of files) {
+      if (!file.startsWith("bot-") || !file.endsWith(".log")) continue;
+      
+      const filePath = path.join(LOG_DIR, file);
+      const stats = fs.statSync(filePath);
+      const age = now - stats.mtimeMs;
+      
+      if (age > maxAge) {
+        fs.unlinkSync(filePath);
+        removedCount++;
+      }
+    }
+    
+    if (removedCount > 0) {
+      console.log(`${colors.gray}已清理 ${removedCount} 個過期 log 文件${colors.reset}`);
+    }
+  } catch (error) {
+    console.error(`${colors.red}清理舊 log 失敗: ${error.message}${colors.reset}`);
+  }
+}
+
+let lastCleanupDate = getDateString();
 
 function log(level, message) {
   const levelConfig = levels[level] || levels.INFO;
   
   if (levelConfig.priority < minPriority) return;
+
+  const currentDate = getDateString();
+  if (currentDate !== lastCleanupDate) {
+    cleanupOldLogs();
+    lastCleanupDate = currentDate;
+  }
 
   const timestamp = nowString();
   const logMessage = `[${timestamp}] [${levelConfig.name}] ${message}`;
@@ -57,7 +110,8 @@ function log(level, message) {
   const coloredMessage = `${colors.gray}[${timestamp}]${colors.reset} ${levelConfig.color}[${levelConfig.name}]${colors.reset} ${message}`;
   console.log(coloredMessage);
   
-  fs.appendFileSync(LOG_FILE, logMessage + "\n");
+  const logFile = getLogFile();
+  fs.appendFileSync(logFile, logMessage + "\n");
 }
 
 export function logDebug(message) {

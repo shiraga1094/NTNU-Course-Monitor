@@ -127,6 +127,8 @@ docker-compose down
 - `RETRY_MAX_DELAY` - 最大重試延遲（毫秒），預設 10000
 - `TMP_DATA_AGE_DAYS` - 暫存資料保留天數，預設 7
 - `CLEANUP_INTERVAL_HOURS` - 清理間隔（小時），預設 24
+- `TZ` - 時區設定，預設 Asia/Taipei（UTC+8）
+- `LOG_RETENTION_DAYS` - 日誌保留天數，預設 30
 - `LOG_LEVEL` - 日誌級別（DEBUG/INFO/WARN/ERROR），預設 INFO
 
 ## 使用指令
