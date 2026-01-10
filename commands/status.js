@@ -1,4 +1,4 @@
-import { fetchOneCourse } from "../fetchOneCourse.js";
+import { fetchOneCourse } from "../services/fetchOneCourse.js";
 import { updateTmp } from "../utils/storage.js";
 
 export async function execute(interaction) {

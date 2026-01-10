@@ -1,8 +1,8 @@
 import axios from "axios";
 import { CookieJar } from "tough-cookie";
 import { wrapper } from "axios-cookiejar-support";
-import { config } from "./config.js";
-import { retry } from "./utils/retry.js";
+import { config } from "../config.js";
+import { retry } from "../utils/retry.js";
 
 const BASE = config.ntnu.baseUrl;
 const INDEX = `${BASE}${config.ntnu.indexPath}`;
@@ -65,13 +65,10 @@ export async function fetchOneCourse({ year, term, serialNo }) {
     return {
       name: c.chn_name,
       teacher: c.teacher,
-
       counter: Number(c.counter_exceptAuth),
       authUsed: Number(c.authorize_using),
       authLimit: Number(c.authorize_p),
-
       limit: Number(c.limit_count_h),
-
       raw: c
     };
   });

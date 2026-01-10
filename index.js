@@ -1,9 +1,9 @@
 import { Client, GatewayIntentBits } from "discord.js";
 import { validateEnv } from "./utils/validateEnv.js";
 import { logCommand, logError, logSuccess } from "./utils/logger.js";
-import { startMonitorSchedule } from "./monitor.js";
+import { startMonitorSchedule } from "./services/monitor.js";
 import { startCleanupSchedule } from "./utils/cleanup.js";
-import { startScheduledReports } from "./scheduler.js";
+import { startScheduledReports } from "./services/scheduler.js";
 import { botStats } from "./utils/stats.js";
 import { config } from "./config.js";
 

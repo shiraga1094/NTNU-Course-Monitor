@@ -165,13 +165,45 @@ export const commands = [
         .setDescription("學期（1 / 2 / 3）")
         .setRequired(true)
     )
+    .addStringOption(opt =>
+      opt
+        .setName("mode")
+        .setDescription("報告模式")
+        .setRequired(true)
+        .addChoices(
+          { name: "間隔模式（需填 interval）", value: "interval" },
+          { name: "固定時刻（需填 days + hour + minute）", value: "cron" }
+        )
+    )
     .addIntegerOption(opt =>
       opt
         .setName("interval")
-        .setDescription("報告間隔（分鐘），預設 60 分鐘")
+        .setDescription("【間隔模式】報告間隔（分鐘）")
         .setRequired(false)
         .setMinValue(5)
         .setMaxValue(1440)
+    )
+    .addStringOption(opt =>
+      opt
+        .setName("days")
+        .setDescription("【固定時刻】星期幾報告，格式：1,3,5 或 0-6（0=日 1=一 2=二 3=三 4=四 5=五 6=六）")
+        .setRequired(false)
+    )
+    .addIntegerOption(opt =>
+      opt
+        .setName("hour")
+        .setDescription("【固定時刻】報告時間：小時（0-23）")
+        .setRequired(false)
+        .setMinValue(0)
+        .setMaxValue(23)
+    )
+    .addIntegerOption(opt =>
+      opt
+        .setName("minute")
+        .setDescription("【固定時刻】報告時間：分鐘（0-59）")
+        .setRequired(false)
+        .setMinValue(0)
+        .setMaxValue(59)
     )
     .addStringOption(opt =>
       opt

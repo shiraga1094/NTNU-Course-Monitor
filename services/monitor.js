@@ -1,10 +1,10 @@
 import { fetchOneCourse } from "./fetchOneCourse.js";
-import { loadSubs, saveSubs, updateTmp } from "./utils/storage.js";
-import { logInfo, logError, logDebug } from "./utils/logger.js";
-import { botStats } from "./utils/stats.js";
-import { config } from "./config.js";
+import { loadSubs, saveSubs, updateTmp } from "../utils/storage.js";
+import { logInfo, logError, logDebug } from "../utils/logger.js";
+import { botStats } from "../utils/stats.js";
+import { config } from "../config.js";
 
-export async function monitorLoop(client) {
+async function monitorLoop(client) {
   const subs = loadSubs();
   const courseMap = {};
 
@@ -56,16 +56,17 @@ export async function monitorLoop(client) {
         if (!entry || entry.lastFull === undefined) continue;
 
         const notifyMode = entry.notifyMode || "both";
-        const shouldNotify = shouldSendNotification(
-          entry.lastFull,
-          isFullNow,
-          notifyMode
-        );
+        const shouldNotify = (lastFull, isFullNow, mode) => {
+          if (lastFull === isFullNow) return false;
+          if (mode === "available") return lastFull && !isFullNow;
+          if (mode === "full") return !lastFull && isFullNow;
+          return true;
+        };
 
-        if (shouldNotify) {
+        if (shouldNotify(entry.lastFull, isFullNow, notifyMode)) {
           try {
             const statusChange = entry.lastFull ? "滿人 → 未滿 🟢" : "未滿 → 滿人 🔴";
-            const notificationMessage = 
+            const message = 
               `**課程狀態變更通知**\n\n` +
               `課程：${course.name}\n` +
               `狀態變更：${statusChange}\n` +
@@ -75,25 +76,23 @@ export async function monitorLoop(client) {
             if (entry.channelId) {
               try {
                 const channel = await client.channels.fetch(entry.channelId);
-                await channel.send(`<@${uid}> ${notificationMessage}`);
-                logInfo(`通知已發送到頻道 ${entry.channelId} - 課程 ${key} - 用戶 ${uid}`);
-              } catch (channelError) {
-                logError(`發送頻道通知失敗 channel=${entry.channelId}: ${channelError.message}`);
-                // 失敗時改發私訊
+                await channel.send(`<@${uid}> ${message}`);
+                logInfo(`通知已發送到頻道 ${entry.channelId} - 課程 ${key}`);
+              } catch (err) {
+                logError(`發送頻道通知失敗: ${err.message}`);
                 const user = await client.users.fetch(uid);
-                await user.send(notificationMessage + `\n\n⚠️ 無法發送到指定頻道，改以私訊發送`);
-                logInfo(`已改以私訊通知用戶 ${uid} - 課程 ${key}`);
+                await user.send(message + `\n\n⚠️ 無法發送到指定頻道，改以私訊發送`);
               }
             } else {
               const user = await client.users.fetch(uid);
-              await user.send(notificationMessage);
+              await user.send(message);
               logInfo(`通知用戶 ${uid} 課程 ${key} 狀態變更：${statusChange}`);
             }
 
             entry.lastFull = isFullNow;
             botStats.incrementNotifications();
-          } catch (error) {
-            logError(`發送通知失敗 user=${uid} course=${key}: ${error.message}`);
+          } catch (err) {
+            logError(`發送通知失敗: ${err.message}`);
             botStats.incrementErrors();
           }
         }
@@ -102,7 +101,7 @@ export async function monitorLoop(client) {
       await new Promise(r => setTimeout(r, config.monitor.perFetchDelay));
       
     } catch (err) {
-      logError(`監控錯誤 course=${key}: ${err.message}`);
+      logError(`監控錯誤: ${err.message}`);
     }
   }
 
@@ -111,27 +110,8 @@ export async function monitorLoop(client) {
   logInfo("監控循環完成");
 }
 
-function shouldSendNotification(lastFull, isFullNow, notifyMode) {
-  if (lastFull === isFullNow) return false;
-
-  switch (notifyMode) {
-    case "available":
-      return lastFull === true && isFullNow === false;
-    case "full":
-      return lastFull === false && isFullNow === true;
-    case "both":
-    default:
-      return true;
-  }
-}
 export function startMonitorSchedule(client) {
-  const interval = config.monitor.checkInterval;
-  
-  logInfo(`監控排程已啟動，檢查間隔：${interval / 1000} 秒`);
-  
-  // 立即執行一次
+  logInfo(`監控排程已啟動，檢查間隔：${config.monitor.checkInterval / 1000} 秒`);
   monitorLoop(client);
-  
-  // 設定定期執行
-  setInterval(() => monitorLoop(client), interval);
+  setInterval(() => monitorLoop(client), config.monitor.checkInterval);
 }

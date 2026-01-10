@@ -1,4 +1,4 @@
-import { fetchOneCourse } from "../fetchOneCourse.js";
+import { fetchOneCourse } from "../services/fetchOneCourse.js";
 
 export async function execute(interaction) {
   await interaction.deferReply({ ephemeral: true });
