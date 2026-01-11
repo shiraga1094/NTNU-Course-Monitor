@@ -105,7 +105,19 @@ async function monitorLoop(client) {
     }
   }
 
-  saveSubs(subs);
+  const finalSubs = loadSubs();
+  for (const uid of Object.keys(subs)) {
+    for (const key of Object.keys(subs[uid])) {
+      if (finalSubs[uid]?.[key]) {
+        finalSubs[uid][key].lastFull = subs[uid][key].lastFull;
+        if (subs[uid][key].channelId !== undefined) {
+          finalSubs[uid][key].channelId = subs[uid][key].channelId;
+        }
+      }
+    }
+  }
+  saveSubs(finalSubs);
+  
   botStats.incrementMonitorLoops();
   logInfo("監控循環完成");
 }

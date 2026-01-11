@@ -141,7 +141,7 @@ export async function execute(interaction) {
       mode: "interval",
       intervalMinutes: interval,
       channelId: channelId || null,
-      lastReportTime: Date.now()
+      nextReportTime: Date.now()
     };
   } else if (mode === "cron") {
     subs[uid][key].scheduledReport = {
@@ -194,6 +194,13 @@ _可使用 \`/unschedule\` 取消定時報告_
     } else {
       const user = await interaction.client.users.fetch(uid);
       await user.send(reportMessage);
+    }
+    
+    if (mode === "interval") {
+      const latestSubs = loadSubs();
+      const intervalMs = interval * 60 * 1000;
+      latestSubs[uid][key].scheduledReport.nextReportTime = Date.now() + intervalMs;
+      saveSubs(latestSubs);
     }
     
     let scheduleInfo;

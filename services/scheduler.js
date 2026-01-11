@@ -44,6 +44,7 @@ async function scheduledReportLoop(client) {
   const subs = loadSubs();
   const currentDateTime = getCurrentDateTime();
   const now = currentDateTime.timestamp;
+  const updates = {};
 
   for (const uid of Object.keys(subs)) {
     for (const [key, entry] of Object.entries(subs[uid])) {
@@ -53,8 +54,7 @@ async function scheduledReportLoop(client) {
       let shouldSend = false;
 
       if (report.mode === "interval" || !report.mode) {
-        const intervalMs = report.intervalMinutes * 60 * 1000;
-        shouldSend = (now - (report.lastReportTime || 0)) >= intervalMs;
+        shouldSend = now >= (report.nextReportTime || 0);
       } else if (report.mode === "cron") {
         shouldSend = shouldSendCronReport(report, currentDateTime);
       }
@@ -116,10 +116,12 @@ _可使用 \`/unschedule\` 取消定時報告_
           logInfo(`定時報告已私訊給用戶 ${uid} - 課程 ${key}`);
         }
 
+        if (!updates[uid]) updates[uid] = {};
         if (report.mode === "interval" || !report.mode) {
-          entry.scheduledReport.lastReportTime = now;
+          const intervalMs = report.intervalMinutes * 60 * 1000;
+          updates[uid][key] = { nextReportTime: now + intervalMs };
         } else if (report.mode === "cron") {
-          entry.scheduledReport.lastReportDate = currentDateTime.dateString;
+          updates[uid][key] = { lastReportDate: currentDateTime.dateString };
         }
         
         botStats.incrementNotifications();
@@ -129,7 +131,17 @@ _可使用 \`/unschedule\` 取消定時報告_
     }
   }
 
-  fs.writeFileSync(config.paths.subscriptions, JSON.stringify(subs, null, 2));
+  if (Object.keys(updates).length > 0) {
+    const latestSubs = loadSubs();
+    for (const uid of Object.keys(updates)) {
+      for (const key of Object.keys(updates[uid])) {
+        if (latestSubs[uid]?.[key]?.scheduledReport) {
+          Object.assign(latestSubs[uid][key].scheduledReport, updates[uid][key]);
+        }
+      }
+    }
+    fs.writeFileSync(config.paths.subscriptions, JSON.stringify(latestSubs, null, 2));
+  }
 }
 
 export function startScheduledReports(client) {
