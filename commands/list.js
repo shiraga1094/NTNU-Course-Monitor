@@ -1,5 +1,11 @@
 import { loadSubs } from "../utils/storage.js";
 
+const DAY_NAMES_ZH = ["日", "一", "二", "三", "四", "五", "六"];
+
+function formatDays(weekdays) {
+  return weekdays.map(d => `週${DAY_NAMES_ZH[d]}`).join("、");
+}
+
 export async function execute(interaction) {
   await interaction.deferReply({ ephemeral: true });
 
@@ -24,9 +30,20 @@ export async function execute(interaction) {
       status.push(`🔔 狀態監控${channelInfo}`);
     }
     if (hasSchedule) {
-      const interval = data.scheduledReport.intervalMinutes;
-      const channelInfo = data.scheduledReport.channelId ? ` (頻道)` : ` (私訊)`;
-      status.push(`⏰ 定時報告 (${interval}分)${channelInfo}`);
+      const scheduleData = data.scheduledReport;
+      const channelInfo = scheduleData.channelId ? ` (頻道)` : ` (私訊)`;
+      
+      let scheduleInfo;
+      if (scheduleData.mode === "interval") {
+        scheduleInfo = `每 ${scheduleData.intervalMinutes} 分鐘`;
+      } else if (scheduleData.mode === "cron") {
+        const timeStr = `${String(scheduleData.hour).padStart(2, '0')}:${String(scheduleData.minute).padStart(2, '0')}`;
+        scheduleInfo = `${formatDays(scheduleData.weekdays)} ${timeStr}`;
+      } else {
+        scheduleInfo = "未知模式";
+      }
+      
+      status.push(`⏰ 定時報告: ${scheduleInfo}${channelInfo}`);
     }
     
     lines.push(`**${key}**\n${status.join('\n')}`);
