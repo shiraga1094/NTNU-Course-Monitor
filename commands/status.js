@@ -23,13 +23,14 @@ export async function execute(interaction) {
   const X = Number(course.raw.counter_exceptAuth);
   const Y = Number(course.raw.authorize_using);
 
-  const normalCount = -Y;
+  const normalCount = X;  // 一般選課人數 = counter_exceptAuth
   const normalLimit = Number(course.raw.limit_count_h);
 
-  const authCount = X + Y;
+  const authUsed = Y <= 0 ? 0 : Y;  // 授權碼使用數，<= 0 時為 0
+  const authCount = authUsed;
   const authLimit = Number(course.raw.authorize_p);
 
-  const totalCount = X;
+  const totalCount = Number(course.raw.counter);  // 選課總人數 = counter
 
   const reply = `
 ${course.name}

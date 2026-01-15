@@ -46,8 +46,7 @@ async function monitorLoop(client) {
 
       updateTmp(key, course.raw);
 
-      const Y = Number(course.raw.authorize_using);
-      const normalCount = -Y;
+      const normalCount = Number(course.raw.counter_exceptAuth);  // 一般選課人數
       const normalLimit = Number(course.raw.limit_count_h);
       const isFullNow = normalCount >= normalLimit;
 

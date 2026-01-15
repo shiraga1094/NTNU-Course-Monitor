@@ -1,5 +1,5 @@
 import { fetchOneCourse } from "../services/fetchOneCourse.js";
-import { loadSubs, saveSubs } from "../utils/storage.js";
+import { loadSubs, saveSubs, updateTmp } from "../utils/storage.js";
 import { logInfo } from "../utils/logger.js";
 
 const DAY_NAMES_ZH = ["日", "一", "二", "三", "四", "五", "六"];
@@ -123,6 +123,8 @@ export async function execute(interaction) {
     return;
   }
 
+  updateTmp(key, course.raw);
+
   const subs = loadSubs();
 
   if (!subs[uid]) subs[uid] = {};
@@ -158,11 +160,12 @@ export async function execute(interaction) {
   saveSubs(subs);
 
   const raw = course.raw;
-  const Y = Number(raw.authorize_using);
-  const normalCount = -Y;
-  const normalLimit = Number(raw.limit_count_h);
   const X = Number(raw.counter_exceptAuth);
-  const authCount = X + Y;
+  const Y = Number(raw.authorize_using);
+  const normalCount = X;  // 一般選課人數 = counter_exceptAuth
+  const normalLimit = Number(raw.limit_count_h);
+  const authUsed = Y <= 0 ? 0 : Y;  // 授權碼使用數，<= 0 時為 0
+  const authCount = authUsed;
   const authLimit = Number(raw.authorize_p);
 
   const isFull = normalCount >= normalLimit;

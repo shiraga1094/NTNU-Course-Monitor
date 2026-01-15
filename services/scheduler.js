@@ -74,11 +74,12 @@ async function scheduledReportLoop(client) {
         }
 
         const raw = course.raw;
-        const Y = Number(raw.authorize_using);
-        const normalCount = -Y;
-        const normalLimit = Number(raw.limit_count_h);
         const X = Number(raw.counter_exceptAuth);
-        const authCount = X + Y;
+        const Y = Number(raw.authorize_using);
+        const normalCount = X;  // 一般選課人數 = counter_exceptAuth
+        const normalLimit = Number(raw.limit_count_h);
+        const authUsed = Y <= 0 ? 0 : Y;  // 授權碼使用數，<= 0 時為 0
+        const authCount = authUsed;
         const authLimit = Number(raw.authorize_p);
         const isFull = normalCount >= normalLimit;
         const status = isFull ? "🔴 已滿" : "🟢 有名額";

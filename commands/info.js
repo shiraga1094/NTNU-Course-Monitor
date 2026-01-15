@@ -1,4 +1,5 @@
 import { fetchOneCourse } from "../services/fetchOneCourse.js";
+import { updateTmp } from "../utils/storage.js";
 
 export async function execute(interaction) {
   await interaction.deferReply({ ephemeral: true });
@@ -6,6 +7,7 @@ export async function execute(interaction) {
   const serialNo = interaction.options.getString("serial_no");
   const year = interaction.options.getInteger("year");
   const term = interaction.options.getInteger("term");
+  const key = `${serialNo}-${year}-${term}`;
 
   const course = await fetchOneCourse({ serialNo, year, term });
   if (!course || !course.raw) {
@@ -13,15 +15,18 @@ export async function execute(interaction) {
     return;
   }
 
+  updateTmp(key, course.raw);
+
   const raw = course.raw;
   const X = Number(raw.counter_exceptAuth);
   const Y = Number(raw.authorize_using);
 
-  const normalCount = -Y;
+  const normalCount = X;  // 一般選課人數 = counter_exceptAuth
   const normalLimit = Number(raw.limit_count_h);
-  const authCount = X + Y;
+  const authUsed = Y <= 0 ? 0 : Y;  // 授權碼使用數，<= 0 時為 0
+  const authCount = authUsed;
   const authLimit = Number(raw.authorize_p);
-  const totalCount = X;
+  const totalCount = Number(raw.counter);  // 選課總人數 = counter
 
   const timeInfo = raw.time_inf || '未提供';
   const credit = raw.credit || '未提供';
